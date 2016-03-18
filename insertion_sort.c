@@ -8,7 +8,8 @@
 #include <time.h> //clock()
 
 static void print_int_array(int *array, int array_size) {
-	for (int i = 0; i < array_size; i++) {
+  int i;
+	for (i = 0; i < array_size; i++) {
 		printf("%d\n", array[i]);
 	}
 }
