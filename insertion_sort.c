@@ -5,6 +5,7 @@
 
 #include <stdio.h> /*printf(), fopen(), fscanf()*/
 #include <stdlib.h> /*EXIT_SUCCESS, atoi(), malloc()*/
+#include <time.h> //clock()
 
 static void print_int_array(int *array, int array_size) {
 	for (int i = 0; i < array_size; i++) {
@@ -50,15 +51,17 @@ int main(int argc, char **argv)
 	}
 
     int arr_size = atoi(argv[2]);
-	int *arr = parse_input(argv[1], arr_size);
- 
-    printf("Given array is \n");
-    print_int_array(arr, arr_size);
+    int *arr = parse_input(argv[1], arr_size);
+
+    clock_t start = clock();
 
     insertion_sort(arr, arr_size);
+
+    clock_t stop = clock();
+    double elapsed = (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
  
-    printf("\nSorted array is \n");
     print_int_array(arr, arr_size);
+    printf("Running time = %f ms\n", elapsed);
     
     return (EXIT_SUCCESS);
 }
