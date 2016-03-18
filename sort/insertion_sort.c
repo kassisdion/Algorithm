@@ -31,20 +31,20 @@ void insertion_sort(int arr[], int n) {
   for (i = 1; i < n; i++) {
     key = arr[i];
     j = i-1;
+    
+    /* Move elements of arr[0..i-1], that are
+    greater than key, to one position ahead
+    of their current position */
+    while (j >= 0 && arr[j] > key) {
+      arr[j + ] = arr[j];
+      j = j - 1;
+    }
+    arr[j+1] = key;
+  }
+}
 
-   /* Move elements of arr[0..i-1], that are
-      greater than key, to one position ahead
-      of their current position */
-      while (j >= 0 && arr[j] > key) {
-       arr[j + ] = arr[j];
-       j = j - 1;
-     }
-     arr[j+1] = key;
-   }
- }
-
- int main(int argc, char **argv) {
-   if (argc != 3) {
+int main(int argc, char **argv) {
+  if (argc != 3) {
     printf("Usage : <your_program> <input_file> <N>\n");
   }
 
@@ -57,9 +57,9 @@ void insertion_sort(int arr[], int n) {
 
   clock_t stop = clock();
   double elapsed = (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
-  
+
   print_int_array(arr, arr_size);
   printf("Running time = %f ms\n", elapsed);
-  
+
   return (EXIT_SUCCESS);
 }

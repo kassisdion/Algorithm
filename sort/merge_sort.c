@@ -54,25 +54,25 @@ void merge(int arr[], int l, int m, int r) {
             i++;
         }
         else {
-           arr[k] = R[j];
-           j++;
-       }
-       k++;
-   }
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
 
-/* Copy the remaining elements of L[], if there are any */
-   while (i < n1) {
-    arr[k] = L[i];
-    i++;
-    k++;
-}
+    /* Copy the remaining elements of L[], if there are any */
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
 
-/* Copy the remaining elements of R[], if there are any */
-while (j < n2) {
-    arr[k] = R[j];
-    j++;
-    k++;
-}
+    /* Copy the remaining elements of R[], if there are any */
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
 }
 
 /* 
@@ -81,13 +81,13 @@ while (j < n2) {
 */
 static void merge_sort(int *a, int l, int r) {
     if (l < r) {
-int mid = (l + r) / 2;//shoudl use l+(r-l)/2 into avoid overflow
+        int mid = (l + r) / 2;//shoudl use l+(r-l)/2 into avoid overflow
+    
+        merge_sort(a, l, mid);
+        merge_sort(a, mid + 1, r);
 
-merge_sort(a, l, mid);
-merge_sort(a, mid + 1, r);
-
-merge(a, l, mid, r);
-}
+        merge(a, l, mid, r);
+    }
 }
 
 int main(int argc, char **argv) {
