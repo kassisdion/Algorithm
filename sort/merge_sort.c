@@ -32,19 +32,19 @@ void merge(int arr[], int l, int m, int r) {
     int n1 = m - l + 1;
     int n2 =  r - m;
 
-/* create and populate left subarray */
+    /* create and populate left subarray */
     int L[n1];
     for (i = 0; i < n1; i++) {
         L[i] = arr[l + i];
     }
 
-/* create and populate right subarray */
+    /* create and populate right subarray */
     int R[n2];
     for (j = 0; j < n2; j++) {
         R[j] = arr[m + 1 + j];
     }
 
-/* merge the 2 subarray back into [l..r]*/
+    /* merge the 2 subarray back into [l..r]*/
     i = 0;
     j = 0;
     k = l;
