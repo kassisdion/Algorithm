@@ -27,8 +27,7 @@ static int* parse_input(char *file_name, int n) {
 }
 
 /* Function to merge the two subarray [l...m] and [m+1...r]*/
-void merge(int arr[], int l, int m, int r)
-{
+void merge(int arr[], int l, int m, int r) {
     int i, j, k;
     int n1 = m - l + 1;
     int n2 =  r - m;
@@ -91,8 +90,7 @@ static void merge_sort(int *a, int l, int r) {
 	}
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	if (argc != 3) {
 		printf("Usage : <your_program> <input_file> <N>\n");
 	}

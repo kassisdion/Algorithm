@@ -1,0 +1,8 @@
+#INSERTION_SORT
+1 000 000 -> Running time = 193000.000000 ms
+100 000 -> Running time = 1930.000000 ms
+1 000 -> Running time = 20.000000 ms
+
+#MERGE_SORT
+1 000 000 -> Running time = 100.000000 ms
+100 000 -> Running time = 10.000000 ms
