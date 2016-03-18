@@ -17,7 +17,8 @@ static int* parse_input(char *file_name, int n) {
 	int *array = malloc(sizeof(int) * n);
 	FILE *file = fopen(file_name, "r");
 
-	for (int i = 0; i < n; i++) {
+  int i;
+	for (i = 0; i < n; i++) {
 		fscanf(file, "%d", &array[i]);
 	}
 
