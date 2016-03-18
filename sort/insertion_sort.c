@@ -36,7 +36,7 @@ void insertion_sort(int arr[], int n) {
     greater than key, to one position ahead
     of their current position */
     while (j >= 0 && arr[j] > key) {
-      arr[j + ] = arr[j];
+      arr[j + 1] = arr[j];
       j = j - 1;
     }
     arr[j+1] = key;
