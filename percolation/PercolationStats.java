@@ -65,9 +65,11 @@ public class PercolationStats {
     }    
 
     private boolean addRandomSite(Percolation perc) {
+        //find a random site in [i][j]
         int i = randomInteger(1, mN);
         int j = randomInteger(1, mN);
 
+        //return true if we open the site, return false if it's already open
         if (perc.isOpen(i, j) == false) {
             perc.open(i, j);
             return true;
