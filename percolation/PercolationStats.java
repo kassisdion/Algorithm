@@ -112,7 +112,6 @@ public class PercolationStats {
     }
 
     private static double calcStddev(double[] a) {
-
         double var = 0.0;
         if (a.length == 0) {
             return Double.NaN;

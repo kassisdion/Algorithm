@@ -49,22 +49,31 @@ public class Percolation {
 
         sites[getQFIndex(i, j)] = SITE_OPEN;
     
+        //check if we are on the top line
         if (i == 1) {
+            //Connect directly to the top node
             uf.union(getQFIndex(i, j), topIdx);
         }
+
+        //check if we are on the bottom line
         if (i == mN) {
+            //connect directly on the bottom node
             uf.union(getQFIndex(i, j), bottomIdx);
         }
 
+        //check if the right node is open
         if (j > 1 && isOpen(i, j - 1)) {
             uf.union(getQFIndex(i, j), getQFIndex(i, j - 1));
         }
+        //check if the left node is open
         if (j < mN && isOpen(i, j + 1)) {
             uf.union(getQFIndex(i, j), getQFIndex(i, j + 1));
-        }        
+        }
+        //check if the top node is open
         if (i > 1 && isOpen(i - 1, j)) {
             uf.union(getQFIndex(i, j), getQFIndex(i - 1, j));
         }
+        //check if the bottom node is open
         if (i < mN && isOpen(i + 1, j)) {
             uf.union(getQFIndex(i, j), getQFIndex(i + 1, j));
         }
