@@ -16,7 +16,7 @@ public class PercolationStats {
     private int mN;             // size of the grid
     private double mMean;       // mean of percolation threshold
     private double mStddev;     // standard deviation of percolation threshold
-
+    
     // perform T independent experiments on an N-by-N grid
     public PercolationStats(int N, int T) {
 
@@ -54,14 +54,10 @@ public class PercolationStats {
     /*
     ** Private method
     */
+    private  Random rand = new Random();
     private int randomInteger(int min, int max) {
-
-        Random rand = new Random();
-
         // nextInt excludes the top value so we have to add 1 to include the top value
-        int randomNum = rand.nextInt((max - min) + 1) + min;
-
-        return randomNum;
+        return randomNum = rand.nextInt((max - min) + 1) + min;
     }    
 
     private boolean addRandomSite(Percolation perc) {
