@@ -84,7 +84,7 @@ public class PercolationStats {
 
             while (perc.percolates() == false) {
 
-                while (addRandomSite(perc));//Loop while we successfuly open a site
+                while (!addRandomSite(perc));//Loop while we successfuly open a site
                 openedSite++;
             }
             fractions[eC] = (double)openedSite / (double)(mN * mN);
