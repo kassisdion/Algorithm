@@ -57,7 +57,7 @@ public class PercolationStats {
     private  Random rand = new Random();
     private int randomInteger(int min, int max) {
         // nextInt excludes the top value so we have to add 1 to include the top value
-        return randomNum = rand.nextInt((max - min) + 1) + min;
+        return rand.nextInt((max - min) + 1) + min;
     }    
 
     private boolean addRandomSite(Percolation perc) {
