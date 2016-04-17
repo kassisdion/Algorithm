@@ -20,7 +20,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
- #include <stdbool.h>
+#include <stdbool.h>
+#include <sys/time.h>
+
 #ifdef _WIN64           // define something for Windows (64-bit)
     #include <time.h>
 #elif _WIN32            // define something for Windows (32-bit)
@@ -120,17 +122,30 @@ print_all_shortest_distance()
 {
     int i = 0;
     while (i < MAX_NUM_NODES) {
-        printf("Node %d : distance=%d\n", m_varray[i]->id,
-         m_varray[i]->dist);
+        printf("Vertext %3d : shortest distance %4d\n", m_varray[i]->id, m_varray[i]->dist);
         i++;
     }
+    printf("number of nodes processed : %d\n", i);
 }
 
 // print shortest path of all nodes
 void
 print_all_shortest_path()
 {
-    //TODO
+    edge_t *tmp;
+    edge_t *head;
+
+    int i;
+    for (i = 0; i < MAX_NUM_NODES; i++) {
+        printf("Vertext %3d : ", m_varray[i]->id);
+        head = m_varray[i]->edges;
+        while (head != NULL) {
+            tmp = head;
+            head = head->next;
+            printf("%d, %d ", tmp->toid, tmp->w);
+        }
+        printf("\n");
+    }
 }
 
 edge_t    *
@@ -309,7 +324,6 @@ read_input_file(char *filename)
     return 0;
 }
 
-
 int
 main(int argc, char *argv[])
 {
@@ -352,7 +366,8 @@ main(int argc, char *argv[])
      * Start the clock for running time calculation
      * run dijkstra here 
      */
-    clock_t start = clock();
+    struct timeval start, stop;
+    gettimeofday(&start, NULL);
 
     run_dijkstra();
 
@@ -364,9 +379,10 @@ main(int argc, char *argv[])
     /*
      * if possible, print shortest path of all nodes 
      */
-//    if (option) {
-//        print_all_shortest_path();
-//    }
+    bool option = false;
+    if (option) {
+        print_all_shortest_path();
+    }
 
     printf("homework output:\n");
     printf("shortest distance to vertices 7,37,59,82,99,115,133,165,188,197\n");
@@ -379,10 +395,10 @@ main(int argc, char *argv[])
     /*
      * calculate running time 
      */
-    clock_t stop = clock();
-    double elapsed = (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
-
-    printf("running time = %f seconds\n", elapsed);
+    gettimeofday(&stop, NULL);
+    time_t sec = stop.tv_sec - start.tv_sec;
+    time_t msec = (stop.tv_usec - start.tv_usec) / 1000;
+    printf("running time = %lu.%03lu seconds\n", sec, msec);
 
     /*
      * memory clean up 
