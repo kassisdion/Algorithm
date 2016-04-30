@@ -18,9 +18,6 @@ public class Solver {
 
     private boolean solved;
     private Node solution;
-    /*********************************
-     * YOU CAN ADD MORE HERE
-     *********************************/
 
     // search node
     private class Node implements Comparable<Node> {
@@ -31,39 +28,20 @@ public class Solver {
         public Node(Board board, int moves, Node prev) {
             if (board == null)
                 throw new java.lang.NullPointerException();
+
             this.board = board;
             this.moves = moves;
             this.prev = prev;
         }
 
-        // calculate distance of this search node
-        public int distance() {
-
-        /*********************************
-         * PUT YOUR CODE HERE
-         *********************************/
-
-            return 0;   // TODO
-        }
-
         // calculate priority of this search node
         public int priority() {
-
-        /*********************************
-         * PUT YOUR CODE HERE
-         *********************************/
-
-            return 0;   // TODO
+            return board.manhattan() + moves;
         }
 
         // compare node by priority (implements Comparable<Node>)
         public int compareTo(Node that) {
-
-        /*********************************
-         * PUT YOUR CODE HERE
-         *********************************/
-
-            return 0;   // TODO
+            return this.priority() - that.priority();
         }
     }
 
@@ -76,55 +54,58 @@ public class Solver {
         solution = null;
 
         // create initial search node (and it's twin)
-
-    /*********************************
-     * PUT YOUR CODE HERE
-     *********************************/
+        Node startingNode = new Node(initial, 0, null);
+        Node twinNode = new Node(initial.twin(), 0, null);
 
         // priority queue
-
-    /*********************************
-     * PUT YOUR CODE HERE
-     *********************************/
+        MinPQ<Node> mainpq = new MinPQ<>();
+        MinPQ<Node> twinpq = new MinPQ<>();
 
         // insert the initial search node into a priority queue
-
-    /*********************************
-     * PUT YOUR CODE HERE
-     *********************************/
+        mainpq.insert(startingNode);
+        twinpq.insert(twinNode);
 
         // solve the puzzle
+        while (!solved) {
+            if (startingNode.board.isGoal()) {
+                solution = startingNode;
+                solved = true;
+            }
 
-    /*********************************
-     * PUT YOUR CODE HERE
-     *********************************/
+            if (twinNode.board.isGoal()) {
+                solution = null;
+                solved = true;
+            }
 
+            startingNode = step(mainpq);
+            twinNode = step(twinpq);
+        }
+    }
+
+    private Node step(MinPQ<Node> pq) {
+        Node least = pq.delMin();
+        for (Board neighbor : least.board.neighbors()) {
+            if (least.prev == null || !neighbor.equals(least.prev.board)) {
+                pq.insert(new Node(neighbor, least.moves + 1, least));
+            }
+        }
+        return least;
     }
 
     // is the initial board solvable?
     public boolean isSolvable() {
-
-    /*********************************
-     * PUT YOUR CODE HERE
-     *********************************/
-
-        return false;   // TODO
+        return solution != null;
     }
     // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
-
-    /*********************************
-     * PUT YOUR CODE HERE
-     *********************************/
-
-        return -1;  // TODO
+        return solution == null ? -1 : solution.moves;
     }
 
     // sequence of boards in a intest solution; null if unsolvable
     public Iterable<Board> solution() {
         if (solution == null)
             return null;
-        Stack<Board> sol = new Stack<Board>();
+        Stack<Board> sol = new Stack<>();
         Node searchNode = solution;
         while (searchNode != null) {
             sol.push(searchNode.board);
