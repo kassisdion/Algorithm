@@ -10,17 +10,13 @@
  **/
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Board {
-
-    private final int[][] goalBoard = new int[][] {
-        {1, 2, 3},
-        {4, 5, 6},
-        {7, 8, 0}
-    };
     private int[][] tiles;
     private int N;
+    private int mManhattan = -1;
 
     // construct a board from an N-by-N array of blocks
     // (where blocks[i][j] = block in row i, column j)
@@ -37,60 +33,44 @@ public class Board {
             System.arraycopy(blocks[i], 0, tiles[i], 0, blocks[i].length);
     }
 
-    // board dimension N
-    public int dimension() {
-        return N;
-    }
-
     // sum of Manhattan distances between blocks and goal
     public int manhattan() {
-        int manhattan = 0;
-
+        if (mManhattan != -1) {
+            return mManhattan;
+        }
+        mManhattan = 0;
         for (int i = 0; i < N; i++) {
-
             for (int j = 0; j < N; j++) {
-                switch (tiles[i][j]) {
-                    case 1: manhattan += (i + j); //(Math.abs(0 - i) + Math.abs(0 - j));
-                            //System.out.println("1->" + (i + j));
-                            break;
+                int currentTile = tiles[i][j];
+                if (currentTile > 0) {
+                    int xdest = (currentTile - 1) / N;
+                    int ydest = (currentTile - 1) % N;
+                    int x = i - xdest;
+                    int y = j - ydest;
 
-                    case 2: manhattan += (i + Math.abs(1 - j)); //(Math.abs(0 - i) + Math.abs(1 - j));
-                            //System.out.println("2->" + (i + Math.abs(1 - j)));
-                            break;
-
-                    case 3: manhattan += (i + Math.abs(2 - j)); //(Math.abs(0 - i) + Math.abs(2 - j));
-                            //System.out.println("3->" + (i + Math.abs(2 - j)));
-                            break;
-
-                    case 4: manhattan += (Math.abs(1 - i) + j); //(Math.abs(1 - i) + Math.abs(0 - j));
-                            //System.out.println("4->" + (Math.abs(1 - i) + j));
-                            break;
-
-                    case 5: manhattan += (Math.abs(1 - i) + Math.abs(1 - j));
-                            //System.out.println("5->" + (Math.abs(1 - i) + Math.abs(1 - j)));
-                            break;
-
-                    case 6: manhattan += (Math.abs(1 - i) + Math.abs(2 - j));
-                            //System.out.println("6->" + (Math.abs(1 - i) + Math.abs(2 - j)));
-                            break;
-
-                    case 7: manhattan += (Math.abs(2 - i) + j);//(Math.abs(2 - i) + Math.abs(0 - j));
-                            //System.out.println("7->" + (Math.abs(2 - i) + j));
-                            break;
-
-                    case 8: manhattan += (Math.abs(2 - i) + Math.abs(1 - j));
-                            //System.out.println("8->" + (Math.abs(2 - i) + Math.abs(1 - j)));
-                            break;
+                    mManhattan += Math.abs(x) + Math.abs(y);
                 }
             }
 
         }
-        return manhattan;
+        return mManhattan;
     }
 
     // is this board the goal board?
     public boolean isGoal() {
-        return java.util.Arrays.equals(tiles, goalBoard);
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+
+                int expect = i * N + j + 1;
+                if (expect != (N * N)) {
+                    if (tiles[i][j] != expect) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private void swap(int[][] blocks, int r1, int c1, int r2, int c2) {
@@ -124,13 +104,16 @@ public class Board {
 
     // does this board equal y?
     public boolean equals(Object y) {
-        if (!(y instanceof Board)) {
+        if (y == null || !(y instanceof Board)) {
             return false;
         }
+
         if (y == this) {
             return true;
         }
-        return this.manhattan() == ((Board)y).manhattan();
+
+        Board tmp = (Board) y;
+        return Arrays.deepEquals(this.tiles, tmp.tiles);
     }
 
     // all neighboring boards
@@ -140,9 +123,57 @@ public class Board {
 
         // put all neighbor boards into the queue
 
-    /*********************************
-     * PUT YOUR CODE HERE
-     *********************************/
+        //we search for empty tile
+        int zeroRow = 0;
+        int zeroCol = 0;
+        for (int row = 0; row < N; row++) {
+            for (int col = 0; col < N; col++) {
+                if (tiles[row][col] == 0) {
+                    zeroRow = row;
+                    zeroCol = col;
+                    break;
+                }
+            }
+        }
+        // swap with above if not on the top row
+        if (zeroRow > 0) {
+            int[][] blocks = new int[N][N];
+            for (int i = 0; i < N; i++) {
+                System.arraycopy(tiles[i], 0, blocks[i], 0, tiles[i].length);
+            }
+            swap(blocks, zeroRow, zeroCol, zeroRow - 1, zeroCol);
+            nbrs.enqueue(new Board(blocks));
+        }
+
+        // swap with bottom if not on the bottom row
+        if (zeroRow < N - 1) {
+            int[][] blocks = new int[N][N];
+            for (int i = 0; i < N; i++) {
+                System.arraycopy(tiles[i], 0, blocks[i], 0, tiles[i].length);
+            }
+            swap(blocks, zeroRow, zeroCol, zeroRow + 1, zeroCol);
+            nbrs.enqueue(new Board(blocks));
+        }
+
+        //swap with left if not on the first col
+        if (zeroCol > 0) {
+            int[][] blocks = new int[N][N];
+            for (int i = 0; i < N; i++) {
+                System.arraycopy(tiles[i], 0, blocks[i], 0, tiles[i].length);
+            }
+            swap(blocks, zeroRow, zeroCol, zeroRow, zeroCol - 1);
+            nbrs.enqueue(new Board(blocks));
+        }
+
+        //swap with right if not on the last col
+        if (zeroCol < N - 1) {
+            int[][] blocks = new int[N][N];
+            for (int i = 0; i < N; i++) {
+                System.arraycopy(tiles[i], 0, blocks[i], 0, tiles[i].length);
+            }
+            swap(blocks, zeroRow, zeroCol, zeroRow, zeroCol + 1);
+            nbrs.enqueue(new Board(blocks));
+        }
 
         return nbrs;
     }
@@ -177,8 +208,8 @@ public class Board {
 
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                blocks[i][j] = (int)in.nextInt();
-                if (blocks[i][j] >= N*N)
+                blocks[i][j] = (int) in.nextInt();
+                if (blocks[i][j] >= N * N)
                     throw new IllegalArgumentException("value must be < N^2");
                 if (blocks[i][j] < 0)
                     throw new IllegalArgumentException("value must be >= 0");
