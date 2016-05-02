@@ -29,17 +29,19 @@ public class Board {
         if (N < 2 || N > 128)
             throw new IllegalArgumentException("N must be <= 128");
 
-        tiles = new int[N*N];
+        tiles = new int[N * N];
         for (int i=0; i < blocks.length; i++) {
             System.arraycopy(blocks[i], 0, tiles, i * N, blocks.length);
         }
         h = manhattanDistance(tiles, N);
         spaceIndex = indexOf(0, tiles);
 
-        goalArray = new int[N];
-        for (int i = 0; i < N; i++) {
-            goalArray[i] = i;
+        goalArray = new int[N * N];
+        goalArray[N * N - 1] = 0;
+        for (int i = 0; i < N * N - 1; i++) {
+            goalArray[i] = i + 1;
         }
+        System.out.println(Arrays.toString(goalArray));
     }
 
     // Build a new Board by sliding tile from given index.
@@ -61,14 +63,13 @@ public class Board {
     private int manhattanDistance(int[] tiles, int N) {
         int h = 0;
 
-        int rowSize = N;
         for (int i = 0; i < tiles.length; i++) {
 
             int currentTile = tiles[i];
 
             if (currentTile != 0) {
-                int xdest = (currentTile - 1)/rowSize - i/rowSize;
-                int ydest = (currentTile - 1)%rowSize - i%rowSize;
+                int xdest = (currentTile - 1)/ N - i/ N;
+                int ydest = (currentTile - 1)% N - i% N;
 
                 h += (Math.abs(xdest) + Math.abs(ydest));
             }

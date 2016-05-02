@@ -12,22 +12,24 @@
  **/
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.PriorityQueue;
-import java.util.Scanner;
-import java.util.Stack;
+import java.util.*;
 
 public class Solver {
 
-    private boolean mSolved;
     private Node mSolution;
+    private final HashSet<Board> mainClosed = new HashSet<>();
+    private final PriorityQueue<Node> queue = new PriorityQueue<Node>(100, new Comparator<Node>() {
+        @Override
+        public int compare(Node a, Node b) {
+            return a.priority() - b.priority();
+        }
+    });
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
         if (initial == null)
             throw new java.lang.NullPointerException();
 
-        mSolved = false;
         mSolution = null;
 
         solve(initial);
@@ -35,46 +37,38 @@ public class Solver {
 
     //Solve the puzzle
     private void solve(Board initial) {
-        // create initial search node (and it's twin)
-        Node startingNode = new Node(initial, 0, null);
-
-        // priority queue for calculation
-        PriorityQueue<Node> mainPq = new PriorityQueue<>(100);
-
-        // store visited node
-        HashSet<Board> mainClosed = new HashSet<>();
 
         // insert the initial search node into a priority queue
-        mainPq.add(startingNode);
-
-
-        System.out.println(startingNode.board.toString());
-        System.out.println();
-
-        for (Board board :startingNode.board.neighbors()) {
-            System.out.println(board.toString());
-            System.out.println();
-        }
+        queue.add(new Node(initial, 0, null));
 
         // solve the puzzle
-        while (!mainPq.isEmpty() && !mSolved) {
+        while (!queue.isEmpty()) {
             //get the lowest priority state
-            startingNode = mainPq.poll();
+            Node node = queue.poll();
+
+            //System.out.println("Current node: " + node.board.toString());
 
             // If it's the goal, we're done.
-            if (startingNode.board.isGoal()) {
-                mSolution = startingNode;
-                mSolved = true;
+            if (node.board.isGoal()) {
+                mSolution = node;
+                break;
             }
 
             // Make sure we don't revisit this node.
-            mainClosed.add(startingNode.board);
+            mainClosed.add(node.board);
+            //System.out.println("Closed: " + node.board.toString());
 
-            for (Board neighbor : startingNode.board.neighbors()) {
+            for (Board neighbor : node.board.neighbors()) {
                 if (neighbor != null && !mainClosed.contains(neighbor)) {
-                    mainPq.add(new Node(neighbor, startingNode.moves + 1, startingNode.prev));
+                    //System.out.println("Add neighbor: " + neighbor.toString());
+                    queue.add(new Node(neighbor, node.moves + 1, node));
+                }
+                else {
+                    //System.out.println("Can't add neighbor: " + neighbor.toString());
                 }
             }
+
+            System.out.println();
         }
     }
 
