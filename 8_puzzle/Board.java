@@ -15,8 +15,9 @@ import java.util.Arrays;
 public class Board {
     final int h;                    // heuristic value
     private final int N;            // tiles length
-    private final int[] spaceIndex; // Space position [0]=row, [1]=col
-    private int[][] tiles;          // tiles array
+    private final int spaceIndex;   // Space position
+    private int[] tiles;            // tiles array
+    private final int[] goalArray;
 
     // construct a board from an N-by-N array of blocks
     // (where blocks[i][j] = block in row i, column j)
@@ -28,62 +29,67 @@ public class Board {
         if (N < 2 || N > 128)
             throw new IllegalArgumentException("N must be <= 128");
 
-        tiles = new int[N][N];
-        for (int i = 0; i < N; i++)
-            System.arraycopy(blocks[i], 0, tiles[i], 0, blocks[i].length);
-
-        h = manhattanDistance(tiles);
+        tiles = new int[N*N];
+        for (int i=0; i < blocks.length; i++) {
+            System.arraycopy(blocks[i], 0, tiles, i * N, blocks.length);
+        }
+        h = manhattanDistance(tiles, N);
         spaceIndex = indexOf(0, tiles);
+
+        goalArray = new int[N];
+        for (int i = 0; i < N; i++) {
+            goalArray[i] = i;
+        }
     }
 
     // Build a new Board by sliding tile from given index.
-    public Board(Board prev, int[] slidePosition) {
-        N = prev.tiles.length;
+    public Board(Board prev, int slidePosition) {
+        N = prev.N;
 
-        tiles = new int[N][N];
-        for (int i = 0; i < N; i++)
-            System.arraycopy(prev.tiles[i], 0, tiles[i], 0, prev.tiles[i].length);
+        tiles =  Arrays.copyOf(prev.tiles, prev.tiles.length);
 
-        swap(prev.tiles, prev.spaceIndex[0], prev.spaceIndex[1], slidePosition[0], slidePosition[1]);
-        h = manhattanDistance(tiles);
+        // we swap
+        tiles[prev.spaceIndex] = tiles[slidePosition];
+        tiles[slidePosition] = 0;
+
+        h = manhattanDistance(tiles, N);
         spaceIndex = indexOf(0, tiles);
+
+        goalArray = prev.goalArray;
     }
 
-    private static int manhattanDistance(int[][] tiles) {
+    private int manhattanDistance(int[] tiles, int N) {
         int h = 0;
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles.length; j++) {
-                int currentTile = tiles[i][j];
-                if (currentTile > 0) {
-                    int xdest = (currentTile - 1) / tiles.length;
-                    int ydest = (currentTile - 1) % tiles.length;
-                    int x = i - xdest;
-                    int y = j - ydest;
 
-                    h += Math.abs(x) + Math.abs(y);
-                }
+        int rowSize = N;
+        for (int i = 0; i < tiles.length; i++) {
+
+            int currentTile = tiles[i];
+
+            if (currentTile != 0) {
+                int xdest = (currentTile - 1)/rowSize - i/rowSize;
+                int ydest = (currentTile - 1)%rowSize - i%rowSize;
+
+                h += (Math.abs(xdest) + Math.abs(ydest));
             }
         }
         return h;
     }
 
-    // Return the index of val in given byte array or {-1, -1} if none found.
-    private static int[] indexOf(int value, int [][] tiles) {
-        //we loop over the tiles until we found the value
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 1; j < tiles.length; j++) {
-                if (tiles[i][j] == value) {
-                    return new int[]{i, j};
-                }
+    // Return the index of val in given byte array or -1 if none found.
+    private static int indexOf(int value, int [] tiles) {
+        for (int i=0; i < tiles.length; i++) {
+            if (tiles[i] == value) {
+                return i;
             }
         }
-        return new int[]{-1, -1};
+        return -1;
     }
 
     // does this board equal y?
     @Override
     public boolean equals(Object y) {
-        return y instanceof Board && Arrays.deepEquals(this.tiles, ((Board) y).tiles);
+        return y instanceof Board && Arrays.equals(this.tiles, ((Board) y).tiles);
     }
 
     @Override
@@ -93,47 +99,7 @@ public class Board {
 
     // is this board the goal board?
     boolean isGoal() {
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-
-                int expect = i * N + j + 1;
-                if (expect != (N * N)) {
-                    if (tiles[i][j] != expect) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    private void swap(int[][] blocks, int r1, int c1, int r2, int c2) {
-        if (r1 < 0 || c1 < 0 || r2 < 0 || c2 < 0)
-            throw new IndexOutOfBoundsException("row/col index < 0");
-        if (r1 >= N || c1 >= N || r2 >= N || c2 >= N)
-            throw new IndexOutOfBoundsException("row/col index >= N");
-
-        // swap blocks
-        int tmp = blocks[r1][c1];
-        blocks[r1][c1] = blocks[r2][c2];
-        blocks[r2][c2] = tmp;
-    }
-
-    // a board that is obtained by exchanging two adjacent blocks in the same row
-    Board twin() {
-        int[][] blocks = new int[N][N];
-        for (int i = 0; i < N; i++)
-            System.arraycopy(tiles[i], 0, blocks[i], 0, tiles[i].length);
-
-        //we loop over the tiles until we can swap blocks[i][j - 1] with block[i][j-1]
-        for (int i = 0; i < N; i++) {
-            for (int j = 1; j < N; j++) {
-                if (blocks[i][j - 1] != 0 && blocks[i][j] != 0) {
-                    swap(blocks, i, j, i, j - 1);
-                }
-            }
-        }
-        return new Board(blocks);
+        return Arrays.equals(goalArray, tiles);
     }
 
     // all neighboring boards
@@ -144,23 +110,23 @@ public class Board {
         // put all neighbor boards into the list
 
         // swap with above if not on the top row
-        if (spaceIndex[0] > 0) {
-            neighbors.add(new Board(this, new int[]{spaceIndex[0] - 1, spaceIndex[1]}));
+        if (spaceIndex > N) {
+            neighbors.add(new Board(this, spaceIndex - N));
         }
 
         // swap with bottom if not on the bottom row
-        if (spaceIndex[0] < N - 1) {
-            neighbors.add(new Board(this, new int[]{spaceIndex[0] + 1, spaceIndex[1]}));
+        if (spaceIndex < (N * N - N)) {
+            neighbors.add(new Board(this, spaceIndex + N));
         }
 
         //swap with left if not on the first col
-        if (spaceIndex[1] > 0) {
-            neighbors.add(new Board(this, new int[]{spaceIndex[0], spaceIndex[1] - 1}));
+        if (spaceIndex % N > 0) {
+            neighbors.add(new Board(this, spaceIndex - 1));
         }
 
         //swap with right if not on the last col
-        if (spaceIndex[1] < N - 1) {
-            neighbors.add(new Board(this, new int[]{spaceIndex[0], spaceIndex[1] + 1}));
+        if (spaceIndex % N < N - 1) {
+            neighbors.add(new Board(this, spaceIndex + 1));
         }
 
         return neighbors;
@@ -168,15 +134,7 @@ public class Board {
 
     // string representation of this board (in the output format specified below)
     public String toString() {
-        StringBuilder s = new StringBuilder();
-        s.append(N + "\n");
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                s.append(String.format("%2d ", tiles[i][j]));
-            }
-            s.append("\n");
-        }
-        return s.toString();
+        return Arrays.toString(tiles);
     }
 }
 

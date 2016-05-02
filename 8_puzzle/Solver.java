@@ -15,6 +15,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Scanner;
+import java.util.Stack;
 
 public class Solver {
 
@@ -36,25 +37,29 @@ public class Solver {
     private void solve(Board initial) {
         // create initial search node (and it's twin)
         Node startingNode = new Node(initial, 0, null);
-        Node twinNode = new Node(initial.twin(), 0, null);
 
         // priority queue for calculation
         PriorityQueue<Node> mainPq = new PriorityQueue<>(100);
-        PriorityQueue<Node> twinPq = new PriorityQueue<>(100);
 
         // store visited node
-        HashSet<Board> twinClosed = new HashSet<>();
         HashSet<Board> mainClosed = new HashSet<>();
 
-       // insert the initial search node into a priority queue
+        // insert the initial search node into a priority queue
         mainPq.add(startingNode);
-        twinPq.add(twinNode);
+
+
+        System.out.println(startingNode.board.toString());
+        System.out.println();
+
+        for (Board board :startingNode.board.neighbors()) {
+            System.out.println(board.toString());
+            System.out.println();
+        }
 
         // solve the puzzle
-        while (!mSolved) {
+        while (!mainPq.isEmpty() && !mSolved) {
             //get the lowest priority state
             startingNode = mainPq.poll();
-            twinNode = twinPq.poll();
 
             // If it's the goal, we're done.
             if (startingNode.board.isGoal()) {
@@ -62,29 +67,16 @@ public class Solver {
                 mSolved = true;
             }
 
-            if (twinNode.board.isGoal()) {
-                mSolution = null;
-                mSolved = true;
-            }
-
             // Make sure we don't revisit this node.
             mainClosed.add(startingNode.board);
-            twinClosed.add(twinNode.board);
 
             for (Board neighbor : startingNode.board.neighbors()) {
                 if (neighbor != null && !mainClosed.contains(neighbor)) {
                     mainPq.add(new Node(neighbor, startingNode.moves + 1, startingNode.prev));
                 }
             }
-
-            for (Board neighbor : twinNode.board.neighbors()) {
-                if (neighbor != null && !mainClosed.contains(neighbor)) {
-                    twinPq.add(new Node(neighbor, twinNode.moves + 1, twinNode.prev));
-                }
-            }
         }
     }
-
 
     // is the initial board solvable?
     private boolean isSolvable() {
