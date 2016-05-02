@@ -12,8 +12,6 @@
  **/
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Scanner;
 
 public class Solver {
@@ -56,7 +54,6 @@ public class Solver {
 
         private MinPQ<Node> pq;
         private Node node;
-        private List<Board> save = new LinkedList<>();
         private ThreadCompleteListener listener;
 
         SolverTask(MinPQ<Node> pq, Node startingNode) {
@@ -76,19 +73,16 @@ public class Solver {
                     listener.notifyOfThreadComplete(node);
                     running = false;
                 } else {
-                    node = step(pq, save);
+                    node = step(pq);
                 }
             }
         }
 
-        private Node step(MinPQ<Node> pq, List<Board> save) {
+        private Node step(MinPQ<Node> pq) {
             Node least = pq.delMin();
             for (Board neighbor : least.board.neighbors()) {
                 if (least.prev == null || !neighbor.equals(least.prev.board)) {
-                    if (!save.contains(neighbor)) {
-                        pq.insert(new Node(neighbor, least.moves + 1, least));
-                        save.add(neighbor);
-                    }
+                    pq.insert(new Node(neighbor, least.moves + 1, least));
                 }
             }
             return least;
