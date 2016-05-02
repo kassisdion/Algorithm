@@ -9,8 +9,8 @@
  * @ Name       : Faisant Florian
  **/
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.PriorityQueue;
 
 public class Board {
     final int h;                    // heuristic value
@@ -80,6 +80,17 @@ public class Board {
         return new int[]{-1, -1};
     }
 
+    // does this board equal y?
+    @Override
+    public boolean equals(Object y) {
+        return y instanceof Board && Arrays.deepEquals(this.tiles, ((Board) y).tiles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(tiles);
+    }
+
     // is this board the goal board?
     boolean isGoal() {
         for (int i = 0; i < N; i++) {
@@ -125,48 +136,34 @@ public class Board {
         return new Board(blocks);
     }
 
-    // does this board equal y?
-    public boolean equals(Object y) {
-        if (y == null || !(y instanceof Board)) {
-            return false;
-        }
-
-        if (y == this) {
-            return true;
-        }
-
-        Board tmp = (Board) y;
-        return Arrays.deepEquals(this.tiles, tmp.tiles);
-    }
-
     // all neighboring boards
-    Iterable<Board> neighbors() {
+    ArrayList<Board> neighbors() {
 
-        Queue<Board> nbrs = new Queue<>();
+        ArrayList<Board> neighbors = new ArrayList<>(4);
 
-        // put all neighbor boards into the queue
+        // put all neighbor boards into the list
 
         // swap with above if not on the top row
         if (spaceIndex[0] > 0) {
-            nbrs.enqueue(new Board(this, new int[]{spaceIndex[0] - 1, spaceIndex[1]}));
+            neighbors.add(new Board(this, new int[]{spaceIndex[0] - 1, spaceIndex[1]}));
         }
 
         // swap with bottom if not on the bottom row
         if (spaceIndex[0] < N - 1) {
-            nbrs.enqueue(new Board(this, new int[]{spaceIndex[0] + 1, spaceIndex[1]}));
+            neighbors.add(new Board(this, new int[]{spaceIndex[0] + 1, spaceIndex[1]}));
         }
 
         //swap with left if not on the first col
         if (spaceIndex[1] > 0) {
-            nbrs.enqueue(new Board(this, new int[]{spaceIndex[0], spaceIndex[1] - 1}));
+            neighbors.add(new Board(this, new int[]{spaceIndex[0], spaceIndex[1] - 1}));
         }
 
         //swap with right if not on the last col
         if (spaceIndex[1] < N - 1) {
-            nbrs.enqueue(new Board(this, new int[]{spaceIndex[0], spaceIndex[1] + 1}));
+            neighbors.add(new Board(this, new int[]{spaceIndex[0], spaceIndex[1] + 1}));
         }
 
-        return nbrs;
+        return neighbors;
     }
 
     // string representation of this board (in the output format specified below)
