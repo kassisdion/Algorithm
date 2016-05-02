@@ -1,19 +1,17 @@
 /**
  * Homework Assignment #6: "8-Puzzle"
- *
- *  - Solver class for solving "8-Puzzle" Programming Assignment
- *
- *  Compilation:  javac Solver.java Board.java
- *  Execution:    java Solver inputfile.txt
- *  Dependencies: MinPQ
+ * <p>
+ * - Solver class for solving "8-Puzzle" Programming Assignment
+ * <p>
+ * Compilation:  javac Solver.java Board.java
+ * Execution:    java Solver inputfile.txt
+ * Dependencies: MinPQ
  *
  * @ Student ID : 50151252
  * @ Name       : Faisant Florian
  **/
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Scanner;
 
 public class Solver {
@@ -82,7 +80,7 @@ public class Solver {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 blocks[i][j] = in.nextInt();
-                if (blocks[i][j] >= N*N)
+                if (blocks[i][j] >= N * N)
                     throw new IllegalArgumentException("value must be < N^2");
                 if (blocks[i][j] < 0)
                     throw new IllegalArgumentException("value must be >= 0");
@@ -106,16 +104,15 @@ public class Solver {
 
         // calculate running time
         time = (System.currentTimeMillis() - start) / 1000.0;
-        System.out.println("time = "+ time + "sec");
+        System.out.println("time = " + time + "sec");
         System.out.println("Minimum number of moves = " + solver.moves() + "\n");
     }
 
-    private Node step(MinPQ<Node> pq, List<Board> save) {
+    private Node step(MinPQ<Node> pq) {
         Node least = pq.delMin();
         for (Board neighbor : least.board.neighbors()) {
             if (least.prev == null || !neighbor.equals(least.prev.board)) {
-                    pq.insert(new Node(neighbor, least.moves + 1, least));
-                    save.add(neighbor);
+                pq.insert(new Node(neighbor, least.moves + 1, least));
             }
         }
         return least;
@@ -125,6 +122,7 @@ public class Solver {
     private boolean isSolvable() {
         return solution != null;
     }
+
     // min number of moves to solve initial board; -1 if unsolvable
     private int moves() {
         return solution == null ? -1 : solution.moves;
