@@ -12,6 +12,8 @@
  **/
 
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Solver {
@@ -25,7 +27,7 @@ public class Solver {
         private int moves;
         private Node prev;
 
-        public Node(Board board, int moves, Node prev) {
+        Node(Board board, int moves, Node prev) {
             if (board == null)
                 throw new java.lang.NullPointerException();
 
@@ -35,7 +37,7 @@ public class Solver {
         }
 
         // calculate priority of this search node
-        public int priority() {
+        int priority() {
             return board.manhattan() + moves;
         }
 
@@ -57,13 +59,17 @@ public class Solver {
         Node startingNode = new Node(initial, 0, null);
         Node twinNode = new Node(initial.twin(), 0, null);
 
-        // priority queue
-        MinPQ<Node> mainpq = new MinPQ<>();
-        MinPQ<Node> twinpq = new MinPQ<>();
+        // priority queue for calculation
+        MinPQ<Node> mainPq = new MinPQ<>();
+        MinPQ<Node> twinPq = new MinPQ<>();
+
+        //list for saving visited board
+        List<Board> mainSave = new LinkedList<>();
+        List<Board> twinSave =  new LinkedList<>();
 
         // insert the initial search node into a priority queue
-        mainpq.insert(startingNode);
-        twinpq.insert(twinNode);
+        mainPq.insert(startingNode);
+        twinPq.insert(twinNode);
 
         // solve the puzzle
         while (!solved) {
@@ -77,32 +83,35 @@ public class Solver {
                 solved = true;
             }
 
-            startingNode = step(mainpq);
-            twinNode = step(twinpq);
+            startingNode = step(mainPq, mainSave);
+            twinNode = step(twinPq, twinSave);
         }
     }
 
-    private Node step(MinPQ<Node> pq) {
+    private Node step(MinPQ<Node> pq, List<Board> save) {
         Node least = pq.delMin();
         for (Board neighbor : least.board.neighbors()) {
             if (least.prev == null || !neighbor.equals(least.prev.board)) {
-                pq.insert(new Node(neighbor, least.moves + 1, least));
+                if (!save.contains(neighbor)) {
+                    pq.insert(new Node(neighbor, least.moves + 1, least));
+                    save.add(neighbor);
+                }
             }
         }
         return least;
     }
 
     // is the initial board solvable?
-    public boolean isSolvable() {
+    private boolean isSolvable() {
         return solution != null;
     }
     // min number of moves to solve initial board; -1 if unsolvable
-    public int moves() {
+    private int moves() {
         return solution == null ? -1 : solution.moves;
     }
 
     // sequence of boards in a intest solution; null if unsolvable
-    public Iterable<Board> solution() {
+    private Iterable<Board> solution() {
         if (solution == null)
             return null;
         Stack<Board> sol = new Stack<>();
