@@ -16,44 +16,20 @@ import java.util.Scanner;
 
 public class Solver {
 
-    private boolean solved;
-    private Node solution;
+    private boolean mSolved;
+    private Node mSolution;
+    private Board mInitialBoard;
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
         if (initial == null)
             throw new java.lang.NullPointerException();
 
-        solved = false;
-        solution = null;
+        mSolved = false;
+        mSolution = null;
+        mInitialBoard = initial;
 
-        // create initial search node (and it's twin)
-        Node startingNode = new Node(initial, 0, null);
-        Node twinNode = new Node(initial.twin(), 0, null);
-
-        // priority queue for calculation
-        MinPQ<Node> mainPq = new MinPQ<>();
-        MinPQ<Node> twinPq = new MinPQ<>();
-
-        // insert the initial search node into a priority queue
-        mainPq.insert(startingNode);
-        twinPq.insert(twinNode);
-
-        // solve the puzzle
-        while (!solved) {
-            if (startingNode.board.isGoal()) {
-                solution = startingNode;
-                solved = true;
-            }
-
-            if (twinNode.board.isGoal()) {
-                solution = null;
-                solved = true;
-            }
-
-            startingNode = step(mainPq);
-            twinNode = step(twinPq);
-        }
+        solve();
     }
 
     // solve a slider puzzle (given below)
@@ -108,6 +84,38 @@ public class Solver {
         System.out.println("Minimum number of moves = " + solver.moves() + "\n");
     }
 
+    //Solve the puzzle
+    private void solve() {
+        // create initial search node (and it's twin)
+        Node startingNode = new Node(mInitialBoard, 0, null);
+        Node twinNode = new Node(mInitialBoard.twin(), 0, null);
+
+        // priority queue for calculation
+        MinPQ<Node> mainPq = new MinPQ<>();
+        MinPQ<Node> twinPq = new MinPQ<>();
+
+        // insert the initial search node into a priority queue
+        mainPq.insert(startingNode);
+        twinPq.insert(twinNode);
+
+        // solve the puzzle
+        while (!mSolved) {
+            if (startingNode.board.isGoal()) {
+                mSolution = startingNode;
+                mSolved = true;
+            }
+
+            if (twinNode.board.isGoal()) {
+                mSolution = null;
+                mSolved = true;
+            }
+
+            startingNode = step(mainPq);
+            twinNode = step(twinPq);
+        }
+    }
+
+    // add neighbor
     private Node step(MinPQ<Node> pq) {
         Node least = pq.delMin();
         for (Board neighbor : least.board.neighbors()) {
@@ -120,20 +128,20 @@ public class Solver {
 
     // is the initial board solvable?
     private boolean isSolvable() {
-        return solution != null;
+        return mSolution != null;
     }
 
     // min number of moves to solve initial board; -1 if unsolvable
     private int moves() {
-        return solution == null ? -1 : solution.moves;
+        return mSolution == null ? -1 : mSolution.moves;
     }
 
     // sequence of boards in a intest solution; null if unsolvable
     private Iterable<Board> solution() {
-        if (solution == null)
+        if (mSolution == null)
             return null;
         Stack<Board> sol = new Stack<>();
-        Node searchNode = solution;
+        Node searchNode = mSolution;
         while (searchNode != null) {
             sol.push(searchNode.board);
             searchNode = searchNode.prev;
@@ -144,8 +152,8 @@ public class Solver {
     // search node
     private class Node implements Comparable<Node> {
         private Board board;
-        private int moves;
-        private Node prev;
+        private int moves; //number of moves from start
+        private Node prev; //previous status
 
         Node(Board board, int moves, Node prev) {
             if (board == null)
@@ -156,9 +164,9 @@ public class Solver {
             this.prev = prev;
         }
 
-        // calculate priority of this search node
+        // calculate priority of this search node for A*
         int priority() {
-            return board.manhattan() + moves;
+            return board.h + moves;
         }
 
         // compare node by priority (implements Comparable<Node>)
