@@ -21,32 +21,6 @@ public class Solver {
     private boolean solved;
     private Node solution;
 
-    // search node
-    private class Node implements Comparable<Node> {
-        private Board board;
-        private int moves;
-        private Node prev;
-
-        Node(Board board, int moves, Node prev) {
-            if (board == null)
-                throw new java.lang.NullPointerException();
-
-            this.board = board;
-            this.moves = moves;
-            this.prev = prev;
-        }
-
-        // calculate priority of this search node
-        int priority() {
-            return board.manhattan() + moves;
-        }
-
-        // compare node by priority (implements Comparable<Node>)
-        public int compareTo(Node that) {
-            return this.priority() - that.priority();
-        }
-    }
-
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
         if (initial == null)
@@ -62,10 +36,6 @@ public class Solver {
         // priority queue for calculation
         MinPQ<Node> mainPq = new MinPQ<>();
         MinPQ<Node> twinPq = new MinPQ<>();
-
-        //list for saving visited board
-        List<Board> mainSave = new LinkedList<>();
-        List<Board> twinSave =  new LinkedList<>();
 
         // insert the initial search node into a priority queue
         mainPq.insert(startingNode);
@@ -83,44 +53,9 @@ public class Solver {
                 solved = true;
             }
 
-            startingNode = step(mainPq, mainSave);
-            twinNode = step(twinPq, twinSave);
+            startingNode = step(mainPq);
+            twinNode = step(twinPq);
         }
-    }
-
-    private Node step(MinPQ<Node> pq, List<Board> save) {
-        Node least = pq.delMin();
-        for (Board neighbor : least.board.neighbors()) {
-            if (least.prev == null || !neighbor.equals(least.prev.board)) {
-                if (!save.contains(neighbor)) {
-                    pq.insert(new Node(neighbor, least.moves + 1, least));
-                    save.add(neighbor);
-                }
-            }
-        }
-        return least;
-    }
-
-    // is the initial board solvable?
-    private boolean isSolvable() {
-        return solution != null;
-    }
-    // min number of moves to solve initial board; -1 if unsolvable
-    private int moves() {
-        return solution == null ? -1 : solution.moves;
-    }
-
-    // sequence of boards in a intest solution; null if unsolvable
-    private Iterable<Board> solution() {
-        if (solution == null)
-            return null;
-        Stack<Board> sol = new Stack<>();
-        Node searchNode = solution;
-        while (searchNode != null) {
-            sol.push(searchNode.board);
-            searchNode = searchNode.prev;
-        }
-        return sol;
     }
 
     // solve a slider puzzle (given below)
@@ -174,5 +109,63 @@ public class Solver {
         System.out.println("time = "+ time + "sec");
         System.out.println("Minimum number of moves = " + solver.moves() + "\n");
     }
-}
 
+    private Node step(MinPQ<Node> pq, List<Board> save) {
+        Node least = pq.delMin();
+        for (Board neighbor : least.board.neighbors()) {
+            if (least.prev == null || !neighbor.equals(least.prev.board)) {
+                    pq.insert(new Node(neighbor, least.moves + 1, least));
+                    save.add(neighbor);
+            }
+        }
+        return least;
+    }
+
+    // is the initial board solvable?
+    private boolean isSolvable() {
+        return solution != null;
+    }
+    // min number of moves to solve initial board; -1 if unsolvable
+    private int moves() {
+        return solution == null ? -1 : solution.moves;
+    }
+
+    // sequence of boards in a intest solution; null if unsolvable
+    private Iterable<Board> solution() {
+        if (solution == null)
+            return null;
+        Stack<Board> sol = new Stack<>();
+        Node searchNode = solution;
+        while (searchNode != null) {
+            sol.push(searchNode.board);
+            searchNode = searchNode.prev;
+        }
+        return sol;
+    }
+
+    // search node
+    private class Node implements Comparable<Node> {
+        private Board board;
+        private int moves;
+        private Node prev;
+
+        Node(Board board, int moves, Node prev) {
+            if (board == null)
+                throw new java.lang.NullPointerException();
+
+            this.board = board;
+            this.moves = moves;
+            this.prev = prev;
+        }
+
+        // calculate priority of this search node
+        int priority() {
+            return board.manhattan() + moves;
+        }
+
+        // compare node by priority (implements Comparable<Node>)
+        public int compareTo(Node that) {
+            return this.priority() - that.priority();
+        }
+    }
+}
