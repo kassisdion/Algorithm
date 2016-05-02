@@ -18,7 +18,7 @@ public class Solver {
 
     private Node mSolution;
     private final HashSet<Board> mainClosed = new HashSet<>();
-    private final PriorityQueue<Node> queue = new PriorityQueue<Node>(100, new Comparator<Node>() {
+    private final PriorityQueue<Node> queue = new PriorityQueue<>(100, new Comparator<Node>() {
         @Override
         public int compare(Node a, Node b) {
             return a.priority() - b.priority();
@@ -46,8 +46,6 @@ public class Solver {
             //get the lowest priority state
             Node node = queue.poll();
 
-            //System.out.println("Current node: " + node.board.toString());
-
             // If it's the goal, we're done.
             if (node.board.isGoal()) {
                 mSolution = node;
@@ -56,15 +54,10 @@ public class Solver {
 
             // Make sure we don't revisit this node.
             mainClosed.add(node.board);
-            //System.out.println("Closed: " + node.board.toString());
 
             for (Board neighbor : node.board.neighbors()) {
                 if (neighbor != null && !mainClosed.contains(neighbor)) {
-                    //System.out.println("Add neighbor: " + neighbor.toString());
                     queue.add(new Node(neighbor, node.moves + 1, node));
-                }
-                else {
-                    //System.out.println("Can't add neighbor: " + neighbor.toString());
                 }
             }
 

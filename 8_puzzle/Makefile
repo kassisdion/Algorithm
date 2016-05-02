@@ -1,5 +1,5 @@
 
-JAVA_SRCS = Board.java Solver.java Queue.java MinPQ.java Stack.java
+JAVA_SRCS = Board.java Solver.java
 
 CLASSES = $(JAVA_SRCS:.java=.class)
 
